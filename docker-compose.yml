@@ -1,0 +1,49 @@
+version: '2'
+services:
+  datos:
+    image: busybox
+    volumes:
+      - .:/app
+  redis:
+    image: redis
+    # ports:
+    #     - "6378:6379"
+    # expose:
+    #   - "6378"
+  colegio_entrevista:
+    build:
+      context: ./docker
+    volumes_from:
+      - datos
+    ports:
+        - "5000:5000"
+    expose:
+      - "5000"
+    links:
+      - redis:redis
+      - mysql:mysql
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: flask
+      MYSQL_PASSWORD: pass123
+      MYSQL_DB: colegio_entrevista
+    depends_on:
+      - datos
+      - redis
+      - mysql
+  mysql:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'colegio_entrevista'
+      MYSQL_USER: 'flask'
+      MYSQL_PASSWORD: 'pass123'
+      MYSQL_ROOT_PASSWORD: 'pass123'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - ./my-db:/var/lib/mysql
+# volumes:
+#   my-db:
